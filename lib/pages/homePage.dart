@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:test/pages/firstPage.dart';
 import 'package:test/pages/profile.dart';
 
 class HomePage extends StatefulWidget {
@@ -20,7 +21,7 @@ class _MyWidgetState extends State<HomePage> {
 
   // pages to navigate to ///
   final List<Widget> _children = [
-    Center(child: Text('mewoooo')),
+    Center(child: Firstpage()),
     Center(child: Text('ssss')),
     Center(child: Text('aaaa')),
     Center(child: Text('aoo')),

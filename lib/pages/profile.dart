@@ -60,7 +60,7 @@ class Profile extends StatelessWidget {
           Container(
             height: 140,
             child: ListView(
-              scrollDirection: Axis.horizontal,
+              scrollDirection: Axis.vertical,
               children: [
                 BubbleCat(text: 'All', image: 'lib/images/image1.jpg',),
                 BubbleCat(text: ' Top',image: 'lib/images/top.jpg'),

@@ -17,8 +17,22 @@ class BubbleCat extends StatelessWidget {
             height: 60,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
+             // border: Border.all(color: Colors.white70),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.shade500,
+                  offset: Offset(4.0, 4.0),
+                  blurRadius: 2.0,
+                  spreadRadius: 2.0,
+                ),
+
+              ],
                color: Colors.grey[300]),
-               child: Image.asset(image, fit: BoxFit.cover,),
+               child: ClipOval(
+                 child: Image.asset(image, fit: BoxFit.cover,
+                 width: 60,
+                 height: 60,),
+               ),
           ),
           SizedBox(height: 10,),
           Text(text),
