@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "125497770189",
+    "project_id": "bella-84ccb",
+    "storage_bucket": "bella-84ccb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:125497770189:android:33cfcda1a678ee7e952984",
+        "android_client_info": {
+          "package_name": "com.fantastic4.test"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCgK7K38L3xAh_aFx2hYP6TA6uxTMM-2WA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
