@@ -13,8 +13,4 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   FLTFirebaseCorePlugin.register(with: registry.registrar(forPlugin: "FLTFirebaseCorePlugin"))
   PathProviderPlugin.register(with: registry.registrar(forPlugin: "PathProviderPlugin"))
   UrlLauncherPlugin.register(with: registry.registrar(forPlugin: "UrlLauncherPlugin"))
-import path_provider_foundation
-
-func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
-  PathProviderPlugin.register(with: registry.registrar(forPlugin: "PathProviderPlugin"))
 }
