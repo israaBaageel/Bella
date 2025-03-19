@@ -5,7 +5,7 @@ import 'package:test/components/my_button.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 
 class confirm extends StatelessWidget {
-  confirm({super.key});
+  const confirm({super.key});
 
   @override
   Widget build(BuildContext context) {

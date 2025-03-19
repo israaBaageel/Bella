@@ -4,18 +4,13 @@ import 'package:test/components/my_button.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 import 'package:test/pages/confirm.dart';
 
-
-
-class Otp extends StatelessWidget{
-
-  Otp({super.key}); 
+class Otp extends StatelessWidget {
+  const Otp({super.key});
 
   @override
-  Widget build(BuildContext context){
-    return  Scaffold(
-      appBar: AppBar(
-        
-      ),
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(),
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
         child: Center(
@@ -25,27 +20,26 @@ class Otp extends StatelessWidget{
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                 
-
-                // greeting 
-                Row(
-                  children: [
-                    Text(
-                      'Verification Code',
-                    style: GoogleFonts.aboreto(
-                      textStyle: TextStyle(fontSize: 22, fontWeight: FontWeight.bold ),
-                                  
-                    ), 
-                    ),
-                  ],
-                ),
-                SizedBox(height: 50), 
-                //
-                Text(
-                  'We have sent the verification code ',
-                style: GoogleFonts.poppins(
-                  textStyle: TextStyle(fontSize: 18,color: Colors.grey),
-                
+                  // greeting
+                  Row(
+                    children: [
+                      Text(
+                        'Verification Code',
+                        style: GoogleFonts.aboreto(
+                          textStyle: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 50),
+                  //
+                  Text(
+                    'We have sent the verification code ',
+                    style: GoogleFonts.poppins(
+                      textStyle: TextStyle(fontSize: 18, color: Colors.grey),
                     ),
                   ),
                   Text(
@@ -56,48 +50,43 @@ class Otp extends StatelessWidget{
                   ),
 
                   //
-
+                  SizedBox(height: 50),
+                  OtpTextField(
+                    numberOfFields: 5,
+                    borderColor: Color(0xFF512DA8),
+                    //set to true to show as box or false to show as dash
+                    showFieldAsBox: true,
+                    //runs when a code is typed in
+                    onCodeChanged: (String code) {
+                      //handle validation or checks here
+                    },
+                    //runs when every textfield is filled
+                    onSubmit: (String verificationCode) {
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: Text("Verification Code"),
+                            content: Text('Code entered is $verificationCode'),
+                          );
+                        },
+                      );
+                    }, // end onSubmit
+                  ),
 
                   SizedBox(height: 50),
-OtpTextField(
-        numberOfFields: 5,
-        borderColor: Color(0xFF512DA8),
-        //set to true to show as box or false to show as dash
-        showFieldAsBox: true, 
-        //runs when a code is typed in
-        onCodeChanged: (String code) {
-            //handle validation or checks here           
-        },
-        //runs when every textfield is filled
-        onSubmit: (String verificationCode){
-            showDialog(
-                context: context,
-                builder: (context){
-                return AlertDialog(
-                    title: Text("Verification Code"),
-                    content: Text('Code entered is $verificationCode'),
-                );
-                }
-            );
-        }, // end onSubmit
-    ),
-              
-              SizedBox(height: 50),
-              
-                //sign in button 
-                
-                MyButton(text: "Confirm", onTap: (){
-                    
-                  Navigator.push(
+
+                  //sign in button
+                  MyButton(
+                    text: "Confirm",
+                    onTap: () {
+                      Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => confirm()),
                       );
-                },
-                )
-              
-              
-              ],
-              
+                    },
+                  ),
+                ],
               ),
             ),
           ),

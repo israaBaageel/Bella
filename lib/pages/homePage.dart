@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:test/pages/firstPage.dart';
 import 'package:test/pages/profile.dart';
-import 'package:test/pages/donation_screen.dart'; // Import the DonationScreen
+import 'package:test/pages/donation_screen.dart';
+import 'package:test/pages/upload_page.dart'; // Import the DonationScreen
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -23,7 +24,7 @@ class _MyWidgetState extends State<HomePage> {
   final List<Widget> _children = [
     Center(child: Firstpage()),
     Center(child: Text('ssss')),
-    Center(child: Text('aaaa')),
+    Center(child: Center(child: UploadPage())),
     Center(child: Text('aoo')),
     Center(child: DonationScreen(selectedItems: [])), // Donation Screen
     Center(child: Profile()),

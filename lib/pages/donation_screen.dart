@@ -4,7 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 class DonationScreen extends StatelessWidget {
   final List<String> selectedItems; // List of selected items for donation
 
-  DonationScreen({required this.selectedItems});
+  const DonationScreen({super.key, required this.selectedItems});
 
   Future<void> _launchAwonPlatform(BuildContext context) async {
     print('Attempting to launch Awon platform...');
