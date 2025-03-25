@@ -69,7 +69,7 @@ class _UploadPageState extends State<UploadPage> {
                       ),
                     );
                   },
-                  child: Text("Upload"),
+                  child: Text("Upload", style: TextStyle(color: Colors.black),),
                 ),
               ),
             ],
