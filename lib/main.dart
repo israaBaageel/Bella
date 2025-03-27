@@ -3,10 +3,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:test/auth/login_or_signUp.dart';
-import 'package:test/pages/forgot_pass.dart';
-import 'package:test/pages/otp.dart';
-import 'package:test/pages/homePage.dart';
-import 'package:test/pages/profile.dart';
 import 'package:test/theme/dark_mode.dart';
 import 'package:test/theme/light_mode.dart';
 

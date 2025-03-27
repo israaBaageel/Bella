@@ -6,6 +6,10 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:test/services/db_serivce.dart';
 
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
+import 'package:http/http.dart' as http;
+import 'dart:io';
 
 Future<bool> uploadToCloudinary(FilePickerResult filePickerResult) async {
   print("Starting upload...");
@@ -21,15 +25,34 @@ Future<bool> uploadToCloudinary(FilePickerResult filePickerResult) async {
 
   // Load Cloudinary credentials
   String cloudName = dotenv.env['CLOUDINARY_CLOUD_NAME'] ?? '';
+  String apiKey = dotenv.env['CLOUDINARY_API_KEY'] ?? '';
+  String apiSecret = dotenv.env['CLOUDINARY_SECRET_KEY'] ?? '';
   String uploadPreset = dotenv.env['CLOUDINARY_UPLOAD_PRESET'] ?? '';
 
-  if (cloudName.isEmpty || uploadPreset.isEmpty) {
+  if (cloudName.isEmpty ||
+      apiKey.isEmpty ||
+      apiSecret.isEmpty ||
+      uploadPreset.isEmpty) {
     print("Cloudinary credentials are missing in .env file");
     return false;
   }
 
+  // Generate timestamp
+  int timestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+
+  // Corrected String to Sign (sorted alphabetically)
+  String toSign =
+      "auto_tagging=0.8&categorization=imagga_tagging&timestamp=$timestamp&upload_preset=$uploadPreset$apiSecret";
+
+  // Generate SHA-1 signature using the API secret and string to sign
+  var bytes = utf8.encode(toSign);
+  var digest = sha1.convert(bytes);
+  String signature = digest.toString();
+
   // Cloudinary upload URL
-  var uri = Uri.parse("https://api.cloudinary.com/v1_1/dtqgjbewx/upload");
+  var uri = Uri.parse(
+    "https://api.cloudinary.com/v1_1/$cloudName/image/upload",
+  );
 
   // Create multipart request
   var request = http.MultipartRequest("POST", uri);
@@ -42,15 +65,19 @@ Future<bool> uploadToCloudinary(FilePickerResult filePickerResult) async {
   );
 
   request.files.add(multipartFile);
+  request.fields['api_key'] = apiKey;
+  request.fields['timestamp'] = timestamp.toString();
+  request.fields['signature'] = signature;
   request.fields['upload_preset'] = uploadPreset;
-  request.fields['resource_type'] = "auto"; // Auto-detect file type
+  request.fields['resource_type'] = "image"; // Auto-detect file type
+  request.fields['categorization'] = "imagga_tagging"; // Enable auto-tagging
+  request.fields['auto_tagging'] = "0.8"; // Confidence threshold
 
-    // Send request
-    var response = await request.send();
-    // Get response
-    var responseBody = await response.stream.bytesToString();
+  // Send request
+  var response = await request.send();
+  var responseBody = await response.stream.bytesToString();
 
-  // print response
+  // Print response
   print("Cloudinary Response: $responseBody");
 
   if (response.statusCode == 200) {
@@ -69,6 +96,7 @@ Future<bool> uploadToCloudinary(FilePickerResult filePickerResult) async {
     return true;
   } else {
     print("Upload failed with status: ${response.statusCode}");
+    print("Response body: $responseBody");
     return false;
   }
 }
@@ -76,7 +104,7 @@ Future<bool> uploadToCloudinary(FilePickerResult filePickerResult) async {
 // delete specific file from cloudinary
 Future<bool> deleteFromCloudinary(String publicId) async {
   // Cloudinary details
-  String cloudName = dotenv.env['CLOUDINARY_CLOUD_NAME'] ?? ''; 
+  String cloudName = dotenv.env['CLOUDINARY_CLOUD_NAME'] ?? '';
   String apiKey = dotenv.env['CLOUDINARY_API_KEY'] ?? '';
   String apiSecret = dotenv.env['CLOUDINARY_SECRET_KEY'] ?? '';
 
@@ -90,6 +118,7 @@ Future<bool> deleteFromCloudinary(String publicId) async {
   var bytes = utf8.encode(toSign);
   var digest = sha1.convert(bytes);
   String signature = digest.toString();
+
   // Prepare the request URL
   var uri = Uri.parse(
     'https://api.cloudinary.com/v1_1/$cloudName/raw/destroy/',
@@ -118,9 +147,8 @@ Future<bool> deleteFromCloudinary(String publicId) async {
     }
   } else {
     print(
-      "Failed to delete the file, status: ${response.statusCode} : ${response.reasonPhrase}",
+      "Failed to delete the file, status: \${response.statusCode} : \${response.reasonPhrase}",
     );
     return false;
   }
 }
-

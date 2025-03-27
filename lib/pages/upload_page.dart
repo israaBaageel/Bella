@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:test/services/cloudinary_service.dart';
 
 class UploadPage extends StatefulWidget {
+  const UploadPage({super.key});
+
   @override
   _UploadPageState createState() => _UploadPageState();
 }
@@ -69,7 +71,7 @@ class _UploadPageState extends State<UploadPage> {
                       ),
                     );
                   },
-                  child: Text("Upload", style: TextStyle(color: Colors.black),),
+                  child: Text("Upload", style: TextStyle(color: Colors.black)),
                 ),
               ),
             ],
