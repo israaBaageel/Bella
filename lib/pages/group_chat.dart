@@ -19,7 +19,7 @@ class CreateGroupPage extends StatefulWidget {
 class _CreateGroupPageState extends State<CreateGroupPage> {
   final GetIt _getIt = GetIt.instance;
 
-  late DatabaseService _databaseService;
+  late AppDatabaseService _databaseService;
   late MediaService _mediaService;
   late CloudinaryService _cloudinaryService;
 
@@ -31,7 +31,7 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
   @override
   void initState() {
     super.initState();
-    _databaseService = _getIt.get<DatabaseService>();
+    _databaseService = _getIt.get<AppDatabaseService>();
     _mediaService = _getIt.get<MediaService>();
     _cloudinaryService = _getIt.get<CloudinaryService>();
   }

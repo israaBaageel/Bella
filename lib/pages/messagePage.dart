@@ -18,7 +18,7 @@ class MessagePage extends StatefulWidget {
 
 class _ChatpageState extends State<MessagePage> {
   final GetIt _getIt = GetIt.instance;
-  late DatabaseService _databaseService;
+  late AppDatabaseService _databaseService;
   late AuthService _authService;
   
   Map<String, dynamic>? userMap;
@@ -29,7 +29,7 @@ class _ChatpageState extends State<MessagePage> {
   @override
   void initState() {
     super.initState();
-    _databaseService = _getIt.get<DatabaseService>();
+    _databaseService = _getIt.get<AppDatabaseService>();
     _authService = _getIt.get<AuthService>();
   }
 

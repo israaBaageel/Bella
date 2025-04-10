@@ -77,4 +77,3 @@ Future<String?> uploadToCloudinary(File file) async {
     }
   }
 }
-

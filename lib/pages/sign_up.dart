@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -39,7 +38,7 @@ class _SignUpState extends State<SignUp> {
   late AuthService _authService;
   late MediaService _mediaService;
   //late StorageService _storageService;
-  late DatabaseService _databaseService;
+  late AppDatabaseService _databaseService;
   late CloudinaryService _cloudinaryService;
 
   File? selectedImage;
@@ -50,7 +49,7 @@ class _SignUpState extends State<SignUp> {
     super.initState();
     _mediaService = _getIt.get<MediaService>();
    // _storageService = _getIt.get<StorageService>();
-   _databaseService = _getIt.get<DatabaseService>();
+   _databaseService = _getIt.get<AppDatabaseService>();
    _authService = _getIt.get<AuthService>();
      _cloudinaryService = _getIt.get<CloudinaryService>();
   }

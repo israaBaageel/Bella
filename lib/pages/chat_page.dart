@@ -26,7 +26,7 @@ class _ChatPageState extends State<ChatPage> {
   final GetIt _getIt = GetIt.instance;
 
   late AuthService _authService;
-  late DatabaseService _databaseService;
+  late AppDatabaseService _databaseService;
   late MediaService _mediaService;
   late CloudinaryService _cloudinaryService;
   
@@ -44,7 +44,7 @@ void initState() {
 
   void _initializeServices() {
     _authService = _getIt.get<AuthService>();
-    _databaseService = _getIt.get<DatabaseService>();
+    _databaseService = _getIt.get<AppDatabaseService>();
     _mediaService = _getIt.get<MediaService>();
     _cloudinaryService = _getIt.get<CloudinaryService>();
   }

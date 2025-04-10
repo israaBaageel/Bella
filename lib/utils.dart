@@ -18,8 +18,8 @@ Future<void> registerServices() async {
     //     getIt.registerSingleton<StorageService>(
     //     StorageService(),
     // );
-    getIt.registerSingleton<DatabaseService>(
-        DatabaseService(),
+    getIt.registerSingleton<AppDatabaseService>(
+        AppDatabaseService(),
     );
 
     getIt.registerSingleton<CloudinaryService>(CloudinaryService());//???

@@ -25,8 +25,7 @@ class _MyWidgetState extends State<HomePage> {
   final List<Widget> _children = [
     Center(child: Firstpage()),
     Center(child: Text('ssss')),
-    Center(child: Center(child: Text("gggg"))),
-    Center(child: MessagePage()),
+    Center(child: Center(child: UploadPage())),    Center(child: MessagePage()),
     Center(child: DonationScreen(selectedItems: [])), // Donation Screen
     Center(child: Profile()),
   ];

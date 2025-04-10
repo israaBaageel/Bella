@@ -1,7 +1,8 @@
-/* import 'dart:io';
+import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:test/services/cloudinary_service.dart';
+import 'package:test/services/cloudinary_service2.dart';
 
 class UploadPage extends StatefulWidget {
   @override
@@ -57,7 +58,7 @@ class _UploadPageState extends State<UploadPage> {
                       return;
                     }
 
-                    final result = await uploadToCloudinary(selectedFile);
+                    final result = await uploadToCloudinary2(selectedFile);
 
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
@@ -83,4 +84,4 @@ class _UploadPageState extends State<UploadPage> {
     );
   }
 }
- */
+ 
