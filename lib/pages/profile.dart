@@ -67,7 +67,7 @@ class Profile extends StatelessWidget {
             SizedBox(
               height: 140,
               child: ListView(
-                scrollDirection: Axis.vertical,
+                scrollDirection: Axis.horizontal,
                 children: [
                   BubbleCat(
                     text: 'All',

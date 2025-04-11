@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
 import 'package:test/pages/messagePage.dart';
 import 'package:test/pages/firstPage.dart';
 import 'package:test/pages/profile.dart';
 import 'package:test/pages/donation_screen.dart';
-import 'package:test/pages/upload_page.dart'; // Import the DonationScreen
+import 'package:test/pages/upload_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -21,42 +22,60 @@ class _MyWidgetState extends State<HomePage> {
     });
   }
 
-  // pages to navigate to ///
+  // pages to navigate to
   final List<Widget> _children = [
     Center(child: Firstpage()),
     Center(child: Text('ssss')),
-    Center(child: Center(child: UploadPage())),    Center(child: MessagePage()),
-    Center(child: DonationScreen(selectedItems: [])), // Donation Screen
+    Center(child: Center(child: UploadPage())),
+    Center(child: MessagePage()),
+    Center(child: DonationScreen(selectedItems: [])),
     Center(child: Profile()),
   ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: _children[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _navigateBottomNavBar,
-        type: BottomNavigationBarType.fixed,
+      bottomNavigationBar: StylishBottomBar(
+        option: BubbleBarOptions(
+          barStyle: BubbleBarStyle.horizontal,
+          bubbleFillStyle: BubbleFillStyle.fill,
+          opacity: 0.4,
+        ),
         items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'home'),
-          BottomNavigationBarItem(
+          BottomBarItem(
+            icon: Icon(Icons.home),
+            title: Text('Home'),
+            backgroundColor: Colors.pink,
+          ),
+          BottomBarItem(
             icon: Icon(Icons.calendar_month),
-            label: 'calendar',
+            title: Text('Calendar'),
+            backgroundColor: Colors.green,
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.add_a_photo), label: 'add'),
-          BottomNavigationBarItem(
+          BottomBarItem(
+            icon: Icon(Icons.add_a_photo),
+            title: Text('Add'),
+            backgroundColor: Colors.orange,
+          ),
+          BottomBarItem(
             icon: Icon(Icons.chat_bubble_outline),
-            label: 'chat',
+            title: Text('Chat'),
+            backgroundColor: Colors.purple,
           ),
-          BottomNavigationBarItem(
+          BottomBarItem(
             icon: Icon(Icons.favorite),
-            label: 'Donate',
-          ), // Donation icon
-          BottomNavigationBarItem(
+            title: Text('Donate'),
+            backgroundColor: Colors.red,
+          ),
+          BottomBarItem(
             icon: Icon(Icons.account_circle_outlined),
-            label: 'profile',
+            title: Text('Profile'),
+            backgroundColor: Colors.teal,
           ),
         ],
+        currentIndex: _selectedIndex,
+        onTap: _navigateBottomNavBar,
       ),
     );
   }

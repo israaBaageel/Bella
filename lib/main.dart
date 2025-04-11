@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:test/auth/login_or_signUp.dart';
+import 'package:test/intro_screens/splash_screen.dart';
 import 'package:test/pages/forgot_pass.dart';
 import 'package:test/pages/otp.dart';
 import 'package:test/pages/homePage.dart';
@@ -34,7 +35,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: LoginOrSignUp(),
+      home: SplashScreen(),
       theme: lightMode,
       darkTheme: darkMode,
     );
