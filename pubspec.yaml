@@ -58,6 +58,7 @@ dependencies:
   uuid: ^4.0.0
   lottie: ^3.3.1
   stylish_bottom_bar: ^1.1.1
+  crypto: ^3.0.6
   
 
 dev_dependencies:

@@ -6,94 +6,89 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:test/services/database_service.dart';
 
+class CloudinaryService2 {
+  // Upload image with metadata (including prediction result)
+  Future<bool> uploadImageWithMetadata(File file, String detectedData) async {
+    print("Starting upload with metadata...");
 
-Future<bool> uploadToCloudinary2(FilePickerResult filePickerResult) async {
-  print("Starting upload...");
+    // Load Cloudinary credentials from environment variables
+    String cloudName = dotenv.env['CLOUDINARY_CLOUD_NAME'] ?? '';
+    String apiKey = dotenv.env['CLOUDINARY_API_KEY'] ?? '';
+    String apiSecret = dotenv.env['CLOUDINARY_SECRET_KEY'] ?? '';
+    String uploadPreset = dotenv.env['CLOUDINARY_UPLOAD_PRESET'] ?? '';
 
-  if (filePickerResult.files.isEmpty ||
-      filePickerResult.files.single.path == null) {
-    print("No file selected or file path is null");
-    return false;
-  }
+    if (cloudName.isEmpty ||
+        apiKey.isEmpty ||
+        apiSecret.isEmpty ||
+        uploadPreset.isEmpty) {
+      print("Cloudinary credentials are missing in .env file");
+      return false;
+    }
 
-  File file = File(filePickerResult.files.single.path!);
-  print("File to upload: ${file.path}");
+    // Generate timestamp
+    int timestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
 
-  // Load Cloudinary credentials
-  String cloudName = dotenv.env['CLOUDINARY_CLOUD_NAME'] ?? '';
-  String apiKey = dotenv.env['CLOUDINARY_API_KEY'] ?? '';
-  String apiSecret = dotenv.env['CLOUDINARY_SECRET_KEY'] ?? '';
-  String uploadPreset = dotenv.env['CLOUDINARY_UPLOAD_PRESET'] ?? '';
+    // Generate the string to sign for signature
+    String toSign =
+        "auto_tagging=0.8&categorization=imagga_tagging&timestamp=$timestamp&upload_preset=$uploadPreset$apiSecret";
 
-  if (cloudName.isEmpty ||
-      apiKey.isEmpty ||
-      apiSecret.isEmpty ||
-      uploadPreset.isEmpty) {
-    print("Cloudinary credentials are missing in .env file");
-    return false;
-  }
+    // Generate SHA-1 signature using the API secret and string to sign
+    var bytes = utf8.encode(toSign);
+    var digest = sha1.convert(bytes);
+    String signature = digest.toString();
 
-  // Generate timestamp
-  int timestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    // Cloudinary upload URL
+    var uri = Uri.parse(
+      "https://api.cloudinary.com/v1_1/$cloudName/image/upload",
+    );
 
-  // Corrected String to Sign (sorted alphabetically)
-  String toSign =
-      "auto_tagging=0.8&categorization=imagga_tagging&timestamp=$timestamp&upload_preset=$uploadPreset$apiSecret";
+    // Create multipart request
+    var request = http.MultipartRequest("POST", uri);
 
-  // Generate SHA-1 signature using the API secret and string to sign
-  var bytes = utf8.encode(toSign);
-  var digest = sha1.convert(bytes);
-  String signature = digest.toString();
+    // Attach the file
+    var multipartFile = await http.MultipartFile.fromPath(
+      'file',
+      file.path,
+      filename: file.path.split("/").last,
+    );
+    request.files.add(multipartFile);
+    request.fields['api_key'] = apiKey;
+    request.fields['timestamp'] = timestamp.toString();
+    request.fields['signature'] = signature;
+    request.fields['upload_preset'] = uploadPreset;
+    request.fields['resource_type'] = "image"; // Auto-detect file type
+    request.fields['categorization'] = "imagga_tagging"; // Enable auto-tagging
+    request.fields['auto_tagging'] = "0.8"; // Confidence threshold
+    request.fields['tags'] =
+        detectedData; // Add prediction result as metadata (tags)
 
-  // Cloudinary upload URL
-  var uri = Uri.parse(
-    "https://api.cloudinary.com/v1_1/$cloudName/image/upload",
-  );
+    // Send request
+    var response = await request.send();
+    var responseBody = await response.stream.bytesToString();
 
-  // Create multipart request
-  var request = http.MultipartRequest("POST", uri);
+    // Print response
+    print("Cloudinary Response: $responseBody");
 
-  // Attach the file
-  var multipartFile = await http.MultipartFile.fromPath(
-    'file',
-    file.path,
-    filename: file.path.split("/").last,
-  );
+    if (response.statusCode == 200) {
+      var jsonResponse = jsonDecode(responseBody);
+      Map<String, String> requiredData = {
+        "name": file.path.split("/").last,
+        "id": jsonResponse["public_id"],
+        "extension": file.path.split(".").last,
+        "size": jsonResponse["bytes"].toString(),
+        "url": jsonResponse["secure_url"],
+        "created_at": jsonResponse["created_at"],
+      };
 
-  request.files.add(multipartFile);
-  request.fields['api_key'] = apiKey;
-  request.fields['timestamp'] = timestamp.toString();
-  request.fields['signature'] = signature;
-  request.fields['upload_preset'] = uploadPreset;
-  request.fields['resource_type'] = "image"; // Auto-detect file type
-  request.fields['categorization'] = "imagga_tagging"; // Enable auto-tagging
-  request.fields['auto_tagging'] = "0.8"; // Confidence threshold
-
-  // Send request
-  var response = await request.send();
-  var responseBody = await response.stream.bytesToString();
-
-  // Print response
-  print("Cloudinary Response: $responseBody");
-
-  if (response.statusCode == 200) {
-    var jsonResponse = jsonDecode(responseBody);
-    Map<String, String> requiredData = {
-      "name": filePickerResult.files.first.name,
-      "id": jsonResponse["public_id"],
-      "extension": filePickerResult.files.first.extension!,
-      "size": jsonResponse["bytes"].toString(),
-      "url": jsonResponse["secure_url"],
-      "created_at": jsonResponse["created_at"],
-    };
-
-    await AppDatabaseService().saveUploadFilesData(requiredData);
-    print("Upload successful!");
-    return true;
-  } else {
-    print("Upload failed with status: ${response.statusCode}");
-    print("Response body: $responseBody");
-    return false;
+      // Save metadata to database
+      await AppDatabaseService().saveUploadFilesData(requiredData);
+      print("Upload successful!");
+      return true;
+    } else {
+      print("Upload failed with status: ${response.statusCode}");
+      print("Response body: $responseBody");
+      return false;
+    }
   }
 }
 

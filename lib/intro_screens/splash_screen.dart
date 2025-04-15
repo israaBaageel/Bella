@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:test/pages/intro.dart';
 
 class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
   @override
   _SplashScreenState createState() => _SplashScreenState();
 }
@@ -22,7 +24,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.purple[100], 
+      backgroundColor: Colors.purple[100],
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -38,7 +40,8 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
             ),
             SizedBox(height: 75),
-            CircularProgressIndicator( // Loading indicator
+            CircularProgressIndicator(
+              // Loading indicator
               valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
             ),
           ],

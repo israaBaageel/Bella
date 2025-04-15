@@ -13,7 +13,6 @@ import 'package:test/services/cloudinary_service.dart';
 import 'package:test/services/database_service.dart';
 import 'package:test/services/media_service.dart';
 //import 'package:test/services/storage_service.dart';
-import 'package:test/consts.dart';
 
 class SignUp extends StatefulWidget {
   final void Function()? onTap;
@@ -25,7 +24,6 @@ class SignUp extends StatefulWidget {
 }
 
 class _SignUpState extends State<SignUp> {
- 
   //text controllers
   final TextEditingController userController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
@@ -42,16 +40,16 @@ class _SignUpState extends State<SignUp> {
   late CloudinaryService _cloudinaryService;
 
   File? selectedImage;
-  bool isloading = false ;
+  bool isloading = false;
 
   @override
   void initState() {
     super.initState();
     _mediaService = _getIt.get<MediaService>();
-   // _storageService = _getIt.get<StorageService>();
-   _databaseService = _getIt.get<AppDatabaseService>();
-   _authService = _getIt.get<AuthService>();
-     _cloudinaryService = _getIt.get<CloudinaryService>();
+    // _storageService = _getIt.get<StorageService>();
+    _databaseService = _getIt.get<AppDatabaseService>();
+    _authService = _getIt.get<AuthService>();
+    _cloudinaryService = _getIt.get<CloudinaryService>();
   }
 
   @override
@@ -147,41 +145,40 @@ class _SignUpState extends State<SignUp> {
 
                   const SizedBox(height: 50),
 
-                  if (isloading)//----------------------------------------
-                  Center(
-                    child: CircularProgressIndicator(),
-                  )
+                  if (isloading) //----------------------------------------
+                    Center(child: CircularProgressIndicator())
                   else
+                    //sign in button
+                    MyButton(
+                      text: "Sign up",
+                      onTap: () async {
+                        // Validate fields first
+                        if (userController.text.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Please enter your name'),
+                            ),
+                          );
+                          return;
+                        }
 
-                  //sign in button
-                  MyButton(
-                    text: "Sign up",
-                    onTap: () async {
-                      // Validate fields first
-                      if (userController.text.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Please enter your name'),
-                          ),
-                        );
-                        return;
-                      }
-
-                      if (passwordController.text !=
-                          confirmpassController.text) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Passwords do not match'),
-                          ),
-                        );
-                        return;
-                      }
+                        if (passwordController.text !=
+                            confirmpassController.text) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Passwords do not match'),
+                            ),
+                          );
+                          return;
+                        }
                         setState(() => isloading = true);
 
                         try {
                           // 1. Create user with email/password
-                          await _authService.signup( emailController.text, passwordController.text);
-
+                          await _authService.signup(
+                            emailController.text,
+                            passwordController.text,
+                          );
 
                           String? pfpURL;
 
@@ -195,56 +192,58 @@ class _SignUpState extends State<SignUp> {
                           //       );
                           // }
 
-                                // 2. Upload profile picture to Cloudinary if selected
-      if (selectedImage != null) {
-        final uploadResult = await _cloudinaryService.uploadProfileImage(
-          selectedImage!,
-          _authService.user!.uid,
-        );
-                if (uploadResult == null) {
-          throw Exception("Profile picture upload failed");
-        }
-         pfpURL = uploadResult;
-      }
+                          // 2. Upload profile picture to Cloudinary if selected
+                          if (selectedImage != null) {
+                            final uploadResult = await _cloudinaryService
+                                .uploadProfileImage(
+                                  selectedImage!,
+                                  _authService.user!.uid,
+                                );
+                            if (uploadResult == null) {
+                              throw Exception("Profile picture upload failed");
+                            }
+                            pfpURL = uploadResult;
+                          }
 
                           // 3. Update user profile with display name and photo URL
                           await _authService.user!.updateProfile(
                             displayName: userController.text,
-                           // photoURL: pfpURL,
+                            // photoURL: pfpURL,
                           );
+
                           ///--
                           await _databaseService.createUserProfile(
                             userProfile: UserProfile(
                               uid: _authService.user!.uid,
                               name: userController.text,
                               email: emailController.text,
-                              pfpURL :pfpURL,
+                              pfpURL: pfpURL,
                             ),
                           );
 
-                        // Navigate to home page
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const HomePage(),
-                          ),
-                        );
-                      } on FirebaseAuthException catch (e) {
-                        String errorMessage = 'Sign up failed';
-                        if (e.code == 'weak-password') {
-                          errorMessage = 'Make your password more strong';
-                        } else if (e.code == 'email-already-in-use') {
-                          errorMessage = 'Email already exists';
-                        } else if (e.code == 'invalid-email') {
-                          errorMessage = 'Invalid email address';
-                        }
+                          // Navigate to home page
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const HomePage(),
+                            ),
+                          );
+                        } on FirebaseAuthException catch (e) {
+                          String errorMessage = 'Sign up failed';
+                          if (e.code == 'weak-password') {
+                            errorMessage = 'Make your password more strong';
+                          } else if (e.code == 'email-already-in-use') {
+                            errorMessage = 'Email already exists';
+                          } else if (e.code == 'invalid-email') {
+                            errorMessage = 'Invalid email address';
+                          }
 
-                        ScaffoldMessenger.of(
-                          context,
-                        ).showSnackBar(SnackBar(content: Text(errorMessage)));
-                      } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
+                          ScaffoldMessenger.of(
+                            context,
+                          ).showSnackBar(SnackBar(content: Text(errorMessage)));
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
                               content: Text(
                                 'An error occurred: ${e.toString()}',
                               ),
@@ -255,8 +254,8 @@ class _SignUpState extends State<SignUp> {
                             setState(() => isloading = false);
                           }
                         }
-                    },
-                  ),
+                      },
+                    ),
                 ],
               ),
             ),
@@ -267,26 +266,27 @@ class _SignUpState extends State<SignUp> {
   }
 
   ///select the profile picture -----------------
-Widget _pfpSelectionFiled(BuildContext context) {
-  return GestureDetector(
-    onTap: () async {
-      try {
-        final file = await _mediaService.getImageFromGallery();
-        if (file != null) {
-          setState(() => selectedImage = file);
+  Widget _pfpSelectionFiled(BuildContext context) {
+    return GestureDetector(
+      onTap: () async {
+        try {
+          final file = await _mediaService.getImageFromGallery();
+          if (file != null) {
+            setState(() => selectedImage = file);
+          }
+        } catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Failed to select image: ${e.toString()}")),
+          );
         }
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Failed to select image: ${e.toString()}")),
-        );
-      }
-    },
-    child: CircleAvatar(
-      radius: MediaQuery.of(context).size.width * 0.15,
-      backgroundImage: selectedImage != null
-          ? FileImage(selectedImage!)
-          :  NetworkImage(PLACEHOLDER_PFP) as ImageProvider,
-    ),
-  );
-}
+      },
+      child: CircleAvatar(
+        radius: MediaQuery.of(context).size.width * 0.15,
+        backgroundImage:
+            selectedImage != null
+                ? FileImage(selectedImage!)
+                : NetworkImage(PLACEHOLDER_PFP) as ImageProvider,
+      ),
+    );
+  }
 }

@@ -5,7 +5,6 @@ import 'package:test/models/chat.dart';
 import 'package:test/models/message.dart';
 import 'package:test/models/user_profile.dart';
 import 'package:test/services/auth_service.dart';
-import 'package:test/services/cloudinary_service.dart';
 import 'package:test/services/cloudinary_service2.dart';
 import 'package:test/utils.dart';
 
@@ -25,15 +24,20 @@ class AppDatabaseService {
   }
 
   void _setupCollectionReferences() {
-    _usersCollection = _firebaseFirestore.collection('users').withConverter<UserProfile>(
-      fromFirestore: (snapshots, _) => UserProfile.fromJson(snapshots.data()!),
-      toFirestore: (userProfile, _) => userProfile.toJson(),
-    );
+    _usersCollection = _firebaseFirestore
+        .collection('users')
+        .withConverter<UserProfile>(
+          fromFirestore:
+              (snapshots, _) => UserProfile.fromJson(snapshots.data()!),
+          toFirestore: (userProfile, _) => userProfile.toJson(),
+        );
 
-    _chatsCollection = _firebaseFirestore.collection('chats').withConverter<Chat>(
-      fromFirestore: (snapshots, _) => Chat.fromJson(snapshots.data()!),
-      toFirestore: (chat, _) => chat.toJson(),
-    );
+    _chatsCollection = _firebaseFirestore
+        .collection('chats')
+        .withConverter<Chat>(
+          fromFirestore: (snapshots, _) => Chat.fromJson(snapshots.data()!),
+          toFirestore: (chat, _) => chat.toJson(),
+        );
   }
 
   //=====================[ Files ]=====================
@@ -53,7 +57,6 @@ class AppDatabaseService {
         .collection("uploads")
         .snapshots();
   }
-
 
   Future<bool> deleteFile(String docId, String publicId) async {
     final result = await deleteFromCloudinary(publicId);
@@ -76,8 +79,9 @@ class AppDatabaseService {
 
   Stream<QuerySnapshot<UserProfile>> getUsersProfiles() {
     return _usersCollection
-        ?.where("uid", isNotEqualTo: _authService.user!.uid)
-        .snapshots() as Stream<QuerySnapshot<UserProfile>>;
+            ?.where("uid", isNotEqualTo: _authService.user!.uid)
+            .snapshots()
+        as Stream<QuerySnapshot<UserProfile>>;
   }
 
   //=====================[ Chats ]=====================
@@ -100,7 +104,11 @@ class AppDatabaseService {
     await docRef.set(chat);
   }
 
-  Future<void> sendChatMessage(String uid1, String uid2, Message message) async {
+  Future<void> sendChatMessage(
+    String uid1,
+    String uid2,
+    Message message,
+  ) async {
     String chatID = generateChatID(uid1: uid1, uid2: uid2);
     await _chatsCollection!.doc(chatID).update({
       "messages": FieldValue.arrayUnion([message.toJson()]),
@@ -111,7 +119,8 @@ class AppDatabaseService {
 
   Stream<DocumentSnapshot<Chat>> getChatData(String uid1, String uid2) {
     String chatID = generateChatID(uid1: uid1, uid2: uid2);
-    return _chatsCollection?.doc(chatID).snapshots() as Stream<DocumentSnapshot<Chat>>;
+    return _chatsCollection?.doc(chatID).snapshots()
+        as Stream<DocumentSnapshot<Chat>>;
   }
 
   //=====================[ Group Chats ]=====================
@@ -136,12 +145,13 @@ class AppDatabaseService {
   Future<void> addMemberToGroup(String chatId, String newMemberId) async {
     final docRef = _chatsCollection!.doc(chatId);
     await docRef.update({
-      'participants': FieldValue.arrayUnion([newMemberId])
+      'participants': FieldValue.arrayUnion([newMemberId]),
     });
   }
 
   Future<Map<String, dynamic>> getGroupData(String groupId) async {
-    final groupDoc = await _firebaseFirestore.collection('groups').doc(groupId).get();
+    final groupDoc =
+        await _firebaseFirestore.collection('groups').doc(groupId).get();
     return groupDoc.data() ?? {};
   }
 

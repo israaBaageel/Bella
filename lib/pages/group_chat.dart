@@ -26,7 +26,7 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
   List<UserProfile> selectedUsers = [];
   File? _groupImage;
   String? _groupImageUrl;
-  TextEditingController _groupNameController = TextEditingController();
+  final TextEditingController _groupNameController = TextEditingController();
 
   @override
   void initState() {
@@ -43,59 +43,61 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
       final url = await _cloudinaryService.uploadToCloudinary(file);
       if (url != null) {
         setState(() => _groupImageUrl = url);
-        print("Uploaded image URL: $_groupImageUrl"); // Debugging: Check if URL is valid.
+        print(
+          "Uploaded image URL: $_groupImageUrl",
+        ); // Debugging: Check if URL is valid.
       } else {
-      print("Failed to upload image.");
-    }
+        print("Failed to upload image.");
+      }
     }
   }
 
-Future<void> _createGroup() async {
-  final name = _groupNameController.text.trim();
-  if (name.isEmpty || selectedUsers.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Please provide a group name and select members")),
+  Future<void> _createGroup() async {
+    final name = _groupNameController.text.trim();
+    if (name.isEmpty || selectedUsers.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Please provide a group name and select members"),
+        ),
+      );
+      return;
+    }
+
+    final uidList = selectedUsers.map((u) => u.uid!).toList();
+    final groupId = await _databaseService.createGroupChat(
+      participantIDs: uidList,
+      groupName: name,
+      groupImageUrl: _groupImageUrl,
     );
-    return;
-  }
 
-  final uidList = selectedUsers.map((u) => u.uid!).toList();
-  final groupId = await _databaseService.createGroupChat(
-    participantIDs: uidList,
-    groupName: name,
-    groupImageUrl: _groupImageUrl,
-  );
-
-  if (groupId != null) {
     Navigator.pop(context);
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => MessagePage(),
-      ),
-    );
+    Navigator.push(context, MaterialPageRoute(builder: (_) => MessagePage()));
   }
-}
-
 
   void _viewGroupMembers() {
     showModalBottomSheet(
       context: context,
-      builder: (_) => ListView(
-        children: selectedUsers.map((user) => ListTile(
-          leading: CircleAvatar(child: Text(user.name![0])),
-          title: Text(user.name!),
-          trailing: IconButton(
-            icon: Icon(Icons.remove_circle, color: Colors.red),
-            onPressed: () {
-              setState(() => selectedUsers.remove(user));
-              
-              Navigator.pop(context);
-              _viewGroupMembers();
-            },
+      builder:
+          (_) => ListView(
+            children:
+                selectedUsers
+                    .map(
+                      (user) => ListTile(
+                        leading: CircleAvatar(child: Text(user.name![0])),
+                        title: Text(user.name!),
+                        trailing: IconButton(
+                          icon: Icon(Icons.remove_circle, color: Colors.red),
+                          onPressed: () {
+                            setState(() => selectedUsers.remove(user));
+
+                            Navigator.pop(context);
+                            _viewGroupMembers();
+                          },
+                        ),
+                      ),
+                    )
+                    .toList(),
           ),
-        )).toList(),
-      ),
     );
   }
 
@@ -104,12 +106,7 @@ Future<void> _createGroup() async {
     return Scaffold(
       appBar: AppBar(
         title: Text("Create Group"),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.check),
-            onPressed: _createGroup,
-          )
-        ],
+        actions: [IconButton(icon: Icon(Icons.check), onPressed: _createGroup)],
       ),
       body: Column(
         children: [
@@ -118,9 +115,7 @@ Future<void> _createGroup() async {
             child: CircleAvatar(
               radius: 40,
               backgroundImage:
-                  _groupImageUrl != null
-                   ? NetworkImage(_groupImageUrl!)
-                    : null,
+                  _groupImageUrl != null ? NetworkImage(_groupImageUrl!) : null,
               child: _groupImageUrl == null ? Icon(Icons.camera_alt) : null,
             ),
           ),
@@ -143,7 +138,8 @@ Future<void> _createGroup() async {
                 if (!snapshot.hasData || snapshot.data == null) {
                   return Center(child: CircularProgressIndicator());
                 }
-                final users = snapshot.data!.docs.map((doc) => doc.data()).toList();
+                final users =
+                    snapshot.data!.docs.map((doc) => doc.data()).toList();
                 return ListView.builder(
                   itemCount: users.length,
                   itemBuilder: (context, index) {
@@ -167,7 +163,7 @@ Future<void> _createGroup() async {
                 );
               },
             ),
-          )
+          ),
         ],
       ),
     );

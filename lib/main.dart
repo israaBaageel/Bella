@@ -24,7 +24,9 @@ void main() async {
     ),
   );
   await dotenv.load(fileName: ".env");
-  await registerServices();///----------------------------------
+  await registerServices();
+
+  ///----------------------------------
   runApp(MyApp());
 }
 
