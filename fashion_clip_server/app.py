@@ -17,7 +17,7 @@ fashion_categories = ["t-shirt", "dress", "jeans", "jacket", "shorts",
                      "handbag", "backpack", "purse", "dress-shoes"]
 
 fashion_attributes = {
-    "cati" : ["top", "shoes"],
+    "category" : ["top", "shoes","Bottom","Dress","Others"],
     "color": ["Red", "Blue", "Yellow", "Green", "Orange", "Purple", "Violet", "Red-Orange", "Yellow-Orange", "Yellow-Green", "Blue-Green", 
               "Teal", "Blue-Purple", "Indigo", "Red-Purple", "Magenta", "White", "Black", "Gray", "Light Gray", "Dark Gray", "Silver",
               "Beige", "Ivory", "Taupe", "Charcoal", "Gold", "Amber", "Coral", "Peach", "Rust", "Maroon", "Scarlet", "Turquoise", "Mint",

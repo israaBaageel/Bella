@@ -13,13 +13,11 @@ class Intro extends StatefulWidget {
 }
 
 class _MyWidgetState extends State<Intro> {
-//controller track page
-PageController _controller = PageController();
+  //controller track page
+  final PageController _controller = PageController();
 
-//track if on last page
-bool onLastPage = false;
-
-
+  //track if on last page
+  bool onLastPage = false;
 
   @override
   Widget build(BuildContext context) {
@@ -33,49 +31,55 @@ bool onLastPage = false;
                 onLastPage = (index == 2);
               });
             },
-            children: [
-              IntroPage1(),
-               IntroPage2(),
-                IntroPage3()],
+            children: [IntroPage1(), IntroPage2(), IntroPage3()],
           ),
 
           // dot indicator
           Container(
             alignment: Alignment(0, 0.75),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                //skip
+                GestureDetector(
+                  onTap: () {
+                    _controller.jumpToPage(2);
+                  },
+                  child: Text('skip'),
+                ),
 
-            //skip
-            GestureDetector(
-              onTap: () {
-              _controller.jumpToPage(2);
-              },
-              child: Text('skip')
-              ),
+                //dot indicator
+                SmoothPageIndicator(controller: _controller, count: 3),
 
-            //dot indicator
-            SmoothPageIndicator(controller: _controller, count: 3),
-
-            //next or done
-            onLastPage?
-            GestureDetector(
-              onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context){
-                  return LoginOrSignUp();
-                },),);
-              },
-              child: Text('done')
-              ):            GestureDetector(
-              onTap: () {
-                _controller.nextPage(duration: Duration(milliseconds: 500), curve: Curves.easeIn);
-              },
-              child: Text('next')
-              ),
-          ],
-        )),
+                //next or done
+                onLastPage
+                    ? GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) {
+                              return LoginOrSignUp();
+                            },
+                          ),
+                        );
+                      },
+                      child: Text('done'),
+                    )
+                    : GestureDetector(
+                      onTap: () {
+                        _controller.nextPage(
+                          duration: Duration(milliseconds: 500),
+                          curve: Curves.easeIn,
+                        );
+                      },
+                      child: Text('next'),
+                    ),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
-} 
+}

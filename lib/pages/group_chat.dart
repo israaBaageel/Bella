@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:test/models/user_profile.dart';
-import 'package:test/pages/chat_page.dart';
 import 'package:test/pages/messagePage.dart';
 import 'package:test/services/database_service.dart';
 import 'package:test/services/media_service.dart';

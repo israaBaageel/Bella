@@ -1,3 +1,4 @@
+import 'dart:convert'; // Add this for json decoding
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
@@ -15,7 +16,8 @@ class UploadPage extends StatefulWidget {
 
 class _UploadPageState extends State<UploadPage> {
   File? _image;
-  String _result = "No result yet";
+  Map<String, dynamic> _analysis = {};
+  Map<String, dynamic> _outfit = {};
   final picker = ImagePicker();
   FilePickerResult? _filePickerResult;
 
@@ -54,13 +56,14 @@ class _UploadPageState extends State<UploadPage> {
     if (response.statusCode == 200) {
       final responseData = await response.stream.bytesToString();
       setState(() {
-        _result = "Prediction: $responseData";
+        final responseJson = jsonDecode(responseData);
+        _analysis = responseJson['analysis'];
+        _outfit = responseJson['outfit'];
       });
-      // After detecting the clothing items, upload the image and prediction result to Cloudinary
-      _uploadToCloudinary(responseData);
     } else {
       setState(() {
-        _result = "Error: Unable to get prediction.";
+        _analysis = {};
+        _outfit = {};
       });
     }
   }
@@ -88,25 +91,6 @@ class _UploadPageState extends State<UploadPage> {
     }
   }
 
-  // Function to open the file picker and allow selecting files (if required)
-  void _openFilePicker() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      allowMultiple: false,
-      allowedExtensions: ["jpg", "jpeg", "png", "jfif", "mp4"],
-      type: FileType.custom,
-    );
-
-    if (result != null) {
-      setState(() {
-        _filePickerResult = result;
-        _image = File(
-          result.files.single.path!,
-        ); // Set the selected file as image
-      });
-      _uploadImageAndDetect();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -114,32 +98,96 @@ class _UploadPageState extends State<UploadPage> {
         title: Text('Upload and Detect Fashion Item'),
         centerTitle: true,
       ),
-      body: Padding(
+      body: SingleChildScrollView(
+        // Make the content scrollable
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _image == null
-                ? Text("No image selected.")
-                : Image.file(_image!, height: 200, width: 200),
-            SizedBox(height: 20),
-            Text(
-              _result,
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 18),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _pickImage,
-              child: Text("Pick Image from Gallery"),
-            ),
-            SizedBox(height: 20),
-            // Add the file picker button if you need to allow other file formats
-            ElevatedButton(
-              onPressed: _openFilePicker,
-              child: Text("Pick Image from File Picker"),
-            ),
-          ],
+        child: Center(
+          // Center the content horizontally
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center, // Center vertically
+            crossAxisAlignment:
+                CrossAxisAlignment.center, // Center horizontally
+            children: [
+              _image == null
+                  ? Text("No image selected.")
+                  : Image.file(_image!, height: 200, width: 200),
+              SizedBox(height: 20),
+              // Display the formatted result only if predictions exist
+              _analysis.isEmpty
+                  ? Container()
+                  : Column(
+                    children: [
+                      Text(
+                        "Clothing Analysis",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color:
+                              Colors
+                                  .pink[100], // Light pink color for the heading
+                        ),
+                      ),
+                      Divider(color: Colors.grey), // Add a divider line
+                      SizedBox(height: 10),
+                      // Loop through each analysis result
+                      ..._analysis.entries.map((entry) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 8.0),
+                          child: Text(
+                            "${entry.key}: ${entry.value}",
+                            style: TextStyle(
+                              fontSize: 16,
+                              color:
+                                  Colors
+                                      .black, // Normal text color for answers (black)
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                      SizedBox(height: 20),
+                      Text(
+                        "Suggested Outfit",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color:
+                              Colors
+                                  .pink[100], // Light pink color for the heading
+                        ),
+                      ),
+                      Divider(color: Colors.grey), // Add a divider line
+                      SizedBox(height: 10),
+                      // Loop through each outfit suggestion
+                      ..._outfit.entries.map((entry) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 8.0),
+                          child: Text(
+                            "${entry.key}: ${entry.value}",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight:
+                                  FontWeight
+                                      .normal, // Keep the answers normal (not bold)
+                              color:
+                                  Colors
+                                      .black, // Normal text color for answers (black)
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ],
+                  ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _pickImage,
+                child: Text("Pick Image from Gallery"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor:
+                      Colors.pink[100], // Light pink color for the button
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
