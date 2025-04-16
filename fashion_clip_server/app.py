@@ -3,6 +3,8 @@ from flask import Flask, request, jsonify
 from werkzeug.utils import secure_filename
 from transformers import CLIPProcessor, CLIPModel
 from PIL import Image
+from cloudinary.uploader import upload  # This is for Cloudinary upload
+import cloudinary
 
 app = Flask(__name__)
 
@@ -17,7 +19,7 @@ fashion_categories = ["t-shirt", "dress", "jeans", "jacket", "shorts",
                      "handbag", "backpack", "purse", "dress-shoes"]
 
 fashion_attributes = {
-    "category" : ["top", "shoes","Bottom","Dress","Others"],
+    "category": ["top", "shoes", "bottom", "dress","others"],
     "color": ["Red", "Blue", "Yellow", "Green", "Orange", "Purple", "Violet", "Red-Orange", "Yellow-Orange", "Yellow-Green", "Blue-Green", 
               "Teal", "Blue-Purple", "Indigo", "Red-Purple", "Magenta", "White", "Black", "Gray", "Light Gray", "Dark Gray", "Silver",
               "Beige", "Ivory", "Taupe", "Charcoal", "Gold", "Amber", "Coral", "Peach", "Rust", "Maroon", "Scarlet", "Turquoise", "Mint",
@@ -25,19 +27,19 @@ fashion_attributes = {
               "Tan", "Olive Green", "Terracotta", "Khaki", "Sand", "Sienna", "Umber", "Ochre", "Moss Green", "Bronze", "Copper", "Platinum",
               "Rose Gold", "Gunmetal", "Neon Green", "Electric Blue", "Hot Pink", "Bright Purple", "Lemon Yellow", "Fluorescent Orange",
               "Midnight Blue", "Ebony", "Burgundy", "Forest Green", "Deep Purple", "Dark Slate", "Cyan", "Fuchsia", "Chartreuse", "Vermillion",
-              "Mauve", "Cerulean", "Salmon","floral"],
+              "Mauve", "Cerulean", "Salmon", "floral"],
     "style": ["casual", "formal", "sporty", "bohemian"],
     "season": ["summer", "winter", "spring", "fall"],
     "sleeve_length": ["long sleeve", "short sleeve", "sleeveless", "no sleeves"],
     "bag_type": ["tote bag", "clutch", "backpack", "shoulder bag", "no bag"]
 }
 
-# Ensure the uploads folder exists
-UPLOAD_FOLDER = 'uploads'
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
-
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+# Cloudinary credentials (make sure you have set these in your environment variables or .env file)
+cloudinary.config(
+  cloud_name=os.getenv('CLOUDINARY_CLOUD_NAME'),
+  api_key=os.getenv('CLOUDINARY_API_KEY'),
+  api_secret=os.getenv('CLOUDINARY_SECRET_KEY')
+)
 
 # Helper function to analyze clothing
 def analyze_clothing(image_path):
@@ -98,7 +100,7 @@ def predict():
     
     # Save image to a temporary file
     filename = secure_filename(image_file.filename)
-    image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    image_path = os.path.join('uploads', filename)
     image_file.save(image_path)
 
     try:
@@ -108,11 +110,27 @@ def predict():
         # Generate outfit suggestion based on the analysis
         outfit = generate_outfit(analysis)
         
-        # Return the analysis and outfit suggestion as a response
-        return jsonify({'analysis': analysis, 'outfit': outfit})
+        # Upload image and analysis to Cloudinary
+        image_url = upload_to_cloudinary(image_path, analysis)
+        
+        # Return the analysis, outfit suggestion, and image URL as a response
+        return jsonify({'analysis': analysis, 'outfit': outfit, 'image_url': image_url})
     
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+def upload_to_cloudinary(image_path, analysis):
+    # Upload image to Cloudinary
+    response = upload(
+        image_path,
+        public_id=secure_filename(image_path),
+        tags=[str(val) for val in analysis.values()]  # Add tags as metadata
+    )
+    
+    if response.get('secure_url'):
+        return response['secure_url']
+    else:
+        raise Exception("Cloudinary upload failed.")
 
 if __name__ == '__main__':
     app.run(debug=True)

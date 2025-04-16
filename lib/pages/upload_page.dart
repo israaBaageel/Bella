@@ -5,7 +5,6 @@ import 'package:file_picker/file_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:test/services/cloudinary_service2.dart'; // CloudinaryService2
-import 'package:test/services/database_service.dart'; // Assuming this is for DB integration
 
 class UploadPage extends StatefulWidget {
   const UploadPage({super.key});
@@ -16,8 +15,10 @@ class UploadPage extends StatefulWidget {
 
 class _UploadPageState extends State<UploadPage> {
   File? _image;
-  Map<String, dynamic> _analysis = {};
-  Map<String, dynamic> _outfit = {};
+  Map<String, dynamic> _analysis = {}; // For storing clothing analysis
+  Map<String, dynamic> _outfit = {}; // For storing outfit suggestions
+  String? _imageUrl; // For storing Cloudinary image URL
+  String _statusMessage = ''; // For user feedback
   final picker = ImagePicker();
   FilePickerResult? _filePickerResult;
 
@@ -29,13 +30,18 @@ class _UploadPageState extends State<UploadPage> {
       setState(() {
         _image = File(pickedFile.path);
       });
-      _uploadImageAndDetect();
+      _uploadImageAndDetect(); // Upload the image and detect clothing
     }
   }
 
   // Function to upload image and get prediction from the Flask backend
   Future<void> _uploadImageAndDetect() async {
     if (_image == null) return;
+
+    setState(() {
+      _statusMessage =
+          'Uploading image and detecting...'; // Update status message to show loading
+    });
 
     // Send the image for prediction to the Flask backend
     var request = http.MultipartRequest(
@@ -55,39 +61,65 @@ class _UploadPageState extends State<UploadPage> {
 
     if (response.statusCode == 200) {
       final responseData = await response.stream.bytesToString();
+      print("Response Data: $responseData"); // Debugging the response
+
       setState(() {
         final responseJson = jsonDecode(responseData);
         _analysis = responseJson['analysis'];
         _outfit = responseJson['outfit'];
+        _imageUrl = responseJson['image_url']; // Get the Cloudinary URL
       });
+
+      // Now display the detection results immediately
+      setState(() {
+        _statusMessage =
+            'Detection complete! Now uploading to Cloudinary...'; // Change status
+      });
+
+      // Now upload the image and detected data to Cloudinary
+      bool uploadSuccess = await _uploadToCloudinary();
+
+      if (uploadSuccess) {
+        setState(() {
+          _statusMessage =
+              'Upload successful! Image and prediction saved to Cloudinary.';
+        });
+      } else {
+        setState(() {
+          _statusMessage = 'Upload failed. Please try again.';
+        });
+      }
     } else {
       setState(() {
+        _statusMessage = 'Error during detection. Please try again.';
         _analysis = {};
         _outfit = {};
+        _imageUrl = null;
       });
     }
   }
 
   // Function to upload image and prediction result to Cloudinary
-  Future<void> _uploadToCloudinary(String detectedData) async {
-    if (_image == null) return;
+  Future<bool> _uploadToCloudinary() async {
+    if (_image == null) return false;
 
-    final cloudinaryService2 =
-        CloudinaryService2(); // Create an instance of CloudinaryService2
+    try {
+      final cloudinaryService2 =
+          CloudinaryService2(); // Create an instance of CloudinaryService2
 
-    bool uploadResult = await cloudinaryService2.uploadImageWithMetadata(
-      _image!,
-      detectedData,
-    ); // Call instance method
-
-    if (uploadResult) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Image and prediction uploaded to Cloudinary")),
+      // Send image and detected data (analysis) to Cloudinary
+      bool uploadResult = await cloudinaryService2.uploadImageWithMetadata(
+        _image!,
+        jsonEncode({
+          'analysis': _analysis,
+          'outfit': _outfit,
+        }), // Send the metadata (detection data) as a JSON string
       );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Failed to upload image and prediction")),
-      );
+
+      return uploadResult;
+    } catch (e) {
+      print('Error uploading to Cloudinary: $e'); // Debugging error
+      return false;
     }
   }
 
@@ -180,12 +212,41 @@ class _UploadPageState extends State<UploadPage> {
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _pickImage,
-                child: Text("Pick Image from Gallery"),
                 style: ElevatedButton.styleFrom(
                   backgroundColor:
                       Colors.pink[100], // Light pink color for the button
                 ),
+                child: Text("Pick Image from Gallery"),
               ),
+              SizedBox(height: 20),
+              // Display the Cloudinary image URL if it exists
+              _imageUrl != null
+                  ? Column(
+                    children: [
+                      Text(
+                        "Uploaded Image from Cloudinary:",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Image.network(
+                        _imageUrl!,
+                      ), // Display the image from Cloudinary
+                    ],
+                  )
+                  : Container(),
+              SizedBox(height: 20),
+              // Display the status message
+              _statusMessage.isNotEmpty
+                  ? Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      _statusMessage,
+                      style: TextStyle(fontSize: 16, color: Colors.black),
+                    ),
+                  )
+                  : Container(),
             ],
           ),
         ),
