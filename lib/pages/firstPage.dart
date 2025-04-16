@@ -1,11 +1,14 @@
+
 import 'package:flutter/material.dart';
 import 'package:test/components/image_slider.dart';
 import 'package:test/pages/All_itemPage.dart';
+import 'package:test/pages/change_language_view.dart';
 import 'package:test/util/bubble_cat.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class Firstpage extends StatelessWidget {
   const Firstpage({super.key});
+  
 
   void navigateTo(BuildContext context, Widget page) {
     Navigator.push(
@@ -20,6 +23,7 @@ class Firstpage extends StatelessWidget {
       length: 3,
       child: Scaffold(
         appBar: AppBar(
+          backgroundColor: Colors.green[100],
           title: Text(
             'Hello, Gorgeousssssssssss!',
             style: GoogleFonts.aboreto(
@@ -27,6 +31,73 @@ class Firstpage extends StatelessWidget {
             ),
           ),
         ),
+        drawer: Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: <Widget>[
+              DrawerHeader(
+                decoration: BoxDecoration(
+                  color: Colors.green[100],
+                ),
+                child: Text(
+                  'Menu',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                  ),
+                ),
+              ),
+              ///
+              ListTile(
+                leading: Icon(Icons.home),
+                title: Text('Home'),
+                onTap: () {
+                  // Update the UI
+                 // Navigator.of(context).push(MaterialPageRoute(builder: (context)=>ChangeLanguageView()));
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.settings),
+                title: Text('Settings'),
+                onTap: () {
+                  // Update the UI
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.help),
+                title: Text('Help'),
+                onTap: () {
+                  // Update the UI
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.language),
+                title: Text('Language'),
+                onTap: () {
+                  
+                 Navigator.of(context).push(MaterialPageRoute(builder: (context)=>ChangeLanguageView()));
+                
+                },
+              ),
+
+
+
+               Divider(color: Colors.grey[200],),
+               ListTile(
+                leading: Icon(Icons.logout, color: Colors.red),
+                title: Text('Logout', style: TextStyle(color: Colors.red)),
+                onTap: () {
+                  Navigator.pop(context); // Close the drawer
+                  // Add your logout logic here
+                 // _showLogoutDialog(context);
+                },
+              ),
+            ],
+          ),
+        ),
+
         body: ListView(
           scrollDirection: Axis.vertical,
           padding: const EdgeInsets.all(10),
