@@ -1,7 +1,9 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:test/pages/All_itemPage.dart';
 import 'package:test/util/bubble_cat.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:test/util/catigories.dart';
 import 'package:test/util/explore_grid.dart';
 
 class Profile extends StatelessWidget {
@@ -50,7 +52,7 @@ class Profile extends StatelessWidget {
               child: Row(
                 children: [
                   Text(
-                    'MY CLOSET',
+                    'MY CLOSET'.tr(),
                     style: GoogleFonts.aboreto(
                       textStyle: const TextStyle(
                         fontSize: 20,
@@ -64,44 +66,7 @@ class Profile extends StatelessWidget {
             const SizedBox(height: 10),
 
             // Categories List
-            SizedBox(
-              height: 140,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                children: [
-                  BubbleCat(
-                    text: 'All',
-                    image: 'lib/images/image1.jpg',
-                    onTap: () => navigateTo(context, AllItemPage()),
-                  ),
-                  BubbleCat(
-                    text: 'Top',
-                    image: 'lib/images/top.jpg',
-                    onTap: (){},
-                  ),
-                  BubbleCat(
-                    text: 'Bottom',
-                    image: 'lib/images/bottom.jpg',
-                    onTap: (){},
-                  ),
-                  BubbleCat(
-                    text: 'Shoes',
-                    image: 'lib/images/image1.jpg',
-                    onTap: (){},
-                  ),
-                  BubbleCat(
-                    text: 'Dress',
-                    image: 'lib/images/dress.jpg',
-                    onTap: (){},
-                  ),
-                  BubbleCat(
-                    text: 'Others',
-                    image: 'lib/images/image6.jpg',
-                    onTap: (){},
-                  ),
-                ],
-              ),
-            ),
+            Catigories(),
 
             Padding(
               padding: const EdgeInsets.only(right: 10.0),

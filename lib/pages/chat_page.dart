@@ -1,18 +1,24 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:chatview/chatview.dart' as cv;
+import 'package:dash_chat_2/dash_chat_2.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:test/models/message.dart' as local_models;
+import 'package:test/models/chat.dart';
+import 'package:test/models/message.dart';
 import 'package:test/models/user_profile.dart';
 import 'package:test/services/auth_service.dart';
 import 'package:test/services/cloudinary_service.dart';
 import 'package:test/services/database_service.dart';
 import 'package:test/services/media_service.dart';
 
+import 'package:intl/intl.dart';
+
 class ChatPage extends StatefulWidget {
+
   final UserProfile chatUser;
+  //g
+  
 
   const ChatPage({super.key, required this.chatUser});
 
@@ -21,232 +27,187 @@ class ChatPage extends StatefulWidget {
 }
 
 class _ChatPageState extends State<ChatPage> {
-  bool isUploading = false;
+    bool isUploading = false;
   final GetIt _getIt = GetIt.instance;
 
   late AuthService _authService;
   late AppDatabaseService _databaseService;
   late MediaService _mediaService;
   late CloudinaryService _cloudinaryService;
+  ChatUser? currentUser, otherUser;
 
-  late cv.ChatController _messageController;
-
-  late cv.ChatUser _currentUser;
-
-  @override
+      @override
   void initState() {
     super.initState();
-    _initializeServices();
-    _setupCurrentUserAndController();
-  }
-
-  void _initializeServices() {
     _authService = _getIt.get<AuthService>();
     _databaseService = _getIt.get<AppDatabaseService>();
     _mediaService = _getIt.get<MediaService>();
     _cloudinaryService = _getIt.get<CloudinaryService>();
-  }
+    currentUser = ChatUser(id: _authService.user!.uid, firstName: _authService.user!.displayName,);
+    otherUser = ChatUser(id: widget.chatUser.uid!, firstName: widget.chatUser.name,);
+    //pfp url
 
-  void _setupCurrentUserAndController() {
-    final user = _authService.user!;
-    _currentUser = cv.ChatUser(
-      id: user.uid,
-      name: user.displayName ?? 'You',
-      profilePhoto: user.photoURL ?? '',
-    );
-
-    _messageController = cv.ChatController(
-      initialMessageList: [],
-      scrollController: ScrollController(),
-      otherUsers: [
-        cv.ChatUser(
-          id: widget.chatUser.uid!,
-          name: widget.chatUser.name ?? 'User',
-          profilePhoto: widget.chatUser.pfpURL ?? '',
-        ),
-      ],
-      currentUser: _currentUser,
-    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(appBar: _buildAppBar(), body: _buildChatBody());
+    return Scaffold(
+      appBar: AppBar(title: Text(widget.chatUser.name!),
+      ),
+      body: Stack(
+        children:[
+           _buildUI(),
+            if (isUploading)
+            Center(
+              child: CircularProgressIndicator(),
+            ),
+           ]),
+    );
   }
 
-  AppBar _buildAppBar() {
-    return AppBar(
-      title: Row(
-        children: [
-          if (widget.chatUser.pfpURL != null)
-            CircleAvatar(
-              backgroundImage: NetworkImage(widget.chatUser.pfpURL!),
-              radius: 16,
-            ),
-          const SizedBox(width: 10),
-          Text(widget.chatUser.name!),
-        ],
-      ),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.info_outline),
-          onPressed: () => _showChatInfo(),
+Widget _buildUI() {
+  return StreamBuilder(
+    stream: _databaseService.getChatData(currentUser!.id, otherUser!.id),
+    builder: (context, snapshot) {
+      Chat? chat = snapshot.data?.data();
+      List<ChatMessage> messages = [];
+      if (chat != null && chat.messages != null) {
+        messages = _generateChatMessagesList(chat.messages!);
+      }
+      return DashChat(
+        messageOptions: MessageOptions(
+          showOtherUsersAvatar: true,
+          showTime: true,
+          currentUserContainerColor: Colors.blue,
+          containerColor: Colors.green,
+          textColor: Colors.white,
+          currentUserTextColor: Colors.white,
+          messageMediaBuilder: (ChatMessage message, ChatMessage? previousMessage, ChatMessage? nextMessage) {
+            if (message.medias != null && message.medias!.isNotEmpty) {
+              final media = message.medias!.first;
+              return Column(
+                crossAxisAlignment: message.user == currentUser 
+                    ? CrossAxisAlignment.end 
+                    : CrossAxisAlignment.start,
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => Scaffold(
+                            backgroundColor: Colors.black,
+                            appBar: AppBar(
+                              backgroundColor: Colors.black,
+                              iconTheme: IconThemeData(color: Colors.white),
+                            ),
+                            body: Center(
+                              child: InteractiveViewer(
+                                child: Image.network(media.url),
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.network(
+                        media.url,
+                        width: MediaQuery.of(context).size.width * 0.6,
+                        fit: BoxFit.cover,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Container(
+                            width: MediaQuery.of(context).size.width * 0.6,
+                            height: 200,
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                value: loadingProgress.expectedTotalBytes != null
+                                    ? loadingProgress.cumulativeBytesLoaded /
+                                        loadingProgress.expectedTotalBytes!
+                                    : null,
+                              ),
+                            ),
+                          );
+                        },
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            width: MediaQuery.of(context).size.width * 0.6,
+                            height: 200,
+                            color: Colors.grey[300],
+                            child: Icon(Icons.error, color: Colors.red),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    DateFormat('hh:mm a').format(message.createdAt),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
+              );
+            }
+            return Container();
+          },
         ),
-      ],
-    );
-  }
-
-  Widget _buildChatBody() {
-    return Stack(
-      children: [
-        _buildChatView(),
-        if (isUploading) const Center(child: CircularProgressIndicator()),
-      ],
-    );
-  }
-
-  Widget _buildChatView() {
-    return StreamBuilder(
-      stream: _databaseService.getChatData(
-        _currentUser.id,
-        widget.chatUser.uid!,
-      ),
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        }
-
-        if (!snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        final chat = snapshot.data?.data();
-        final messages =
-            chat?.messages != null
-                ? _convertToChatViewMessages(chat!.messages!)
-                : <cv.Message>[];
-
-        _messageController.initialMessageList
-          ..clear()
-          ..addAll(messages);
-
-        return cv.ChatView(
-          chatController: _messageController,
-          onSendTap: _handleSendMessage,
-          chatViewState:
-              messages.isNotEmpty
-                  ? cv.ChatViewState.hasMessages
-                  : cv.ChatViewState.noData,
-          featureActiveConfig: const cv.FeatureActiveConfig(
-            lastSeenAgoBuilderVisibility: true,
-            receiptsBuilderVisibility: true,
-            enableReplySnackBar: true,
+        inputOptions: InputOptions(
+          sendButtonBuilder: defaultSendButton(
+            color: Colors.pinkAccent,
+            //disabledColor: Colors.grey,
           ),
-          chatBackgroundConfig: cv.ChatBackgroundConfiguration(
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          ),
-          sendMessageConfig: cv.SendMessageConfiguration(
-            textFieldConfig: cv.TextFieldConfiguration(
-              // onMessageTyping: _handleTypingStatus,
-              // composeButtonIcon: Icons.send,
-              textStyle: Theme.of(context).textTheme.bodyMedium,
-            ),
-            defaultSendButtonColor: Theme.of(context).primaryColor,
-            replyDialogColor: Theme.of(context).primaryColor.withValues(),
-          ),
-          messageConfig: cv.MessageConfiguration(
-            imageMessageConfig: const cv.ImageMessageConfiguration(
-              margin: EdgeInsets.symmetric(horizontal: 12, vertical: 15),
-            ),
-          ),
-          loadMoreData: _loadMoreMessages,
-          repliedMessageConfig: cv.RepliedMessageConfiguration(
-            backgroundColor: Theme.of(context).primaryColor.withValues(),
-            verticalBarColor: Theme.of(context).primaryColor,
-          ),
-
-          profileCircleConfig: const cv.ProfileCircleConfiguration(
-            //profileImageRadius: 16,
-          ),
-        );
-      },
-    );
-  }
-
-  List<cv.Message> _convertToChatViewMessages(
-    List<local_models.Message> messages,
-  ) {
-    return messages.map((msg) {
-      return cv.Message(
-        id:
-            msg.sentAt?.millisecondsSinceEpoch.toString() ??
-            DateTime.now().millisecondsSinceEpoch.toString(),
-        message: msg.content ?? '',
-        createdAt: msg.sentAt?.toDate() ?? DateTime.now(),
-        sentBy:
-            msg.senderID == _currentUser.id
-                ? _currentUser.id
-                : widget.chatUser.uid!,
-        //replyMessage: const cv.ReplyMessage(),
-        // reaction: _buildDefaultReactions(),
-        messageType:
-            msg.messageType == local_models.MessageType.Image
-                ? cv.MessageType.image
-                : cv.MessageType.text,
-        // Remove profilePhoto parameter if it's no longer valid
+          alwaysShowSend: true,
+          trailing: [
+            _mediaMessageButton(),
+          ],
+        ),
+        currentUser: currentUser!,
+        onSend: _sendMessage,
+        messages: messages,
       );
-    }).toList();
+    },
+  );
+}
+
+  
+  Future<void> _sendMessage(ChatMessage chatMessage)async{
+    Message message = Message(senderID: currentUser!.id, content: chatMessage.text,
+     messageType: MessageType.Text, sentAt: Timestamp.fromDate(chatMessage.createdAt),
+     );
+     await _databaseService.sendChatMessage(currentUser!.id, otherUser!.id, message);
+
   }
-
-  Future<void> _handleSendMessage(
-    String message,
-    cv.ReplyMessage? replyMessage,
-    cv.MessageType messageType,
-  ) async {
-    final firestoreMessage = local_models.Message(
-      senderID: _currentUser.id,
-      content: message,
-      messageType:
-          messageType == cv.MessageType.image
-              ? local_models.MessageType.Image
-              : local_models.MessageType.Text,
-      sentAt: Timestamp.now(),
-    );
-
-    await _databaseService.sendChatMessage(
-      _currentUser.id,
-      widget.chatUser.uid!,
-      firestoreMessage,
-    );
-  }
-
-  Future<List<cv.Message>> _loadMoreMessages() async {
-    // Implement pagination or load more logic here.
-    return [];
-  }
-
-  List<String> _buildDefaultReactions() {
-    return ['❤️', '👍', '😂', '😮', '😢', '😡'];
-  }
-
-  // void _handleTypingStatus(cv.TypingIndicator typingIndicator) {
-  //   // Handle typing status updates
-  // }
-
-  Future<void> _showChatInfo() async {
-    // Show chat info dialog
-  }
-
   Future<void> _sendImageMessage(File imageFile) async {
     try {
       setState(() => isUploading = true);
-      final imageUrl = await _cloudinaryService.uploadToCloudinary(imageFile);
+
+      // Upload image to Cloudinary
+      String? imageUrl = await _cloudinaryService.uploadToCloudinary(imageFile);
+
       if (imageUrl != null) {
-        await _handleSendMessage(imageUrl, null, cv.MessageType.image);
+        // Create image message
+        Message message = Message(
+          senderID: currentUser!.id,
+          content: imageUrl,
+          messageType: MessageType.Image,
+          sentAt: Timestamp.now(),
+        );
+
+        // Save to Firestore
+        await _databaseService.sendChatMessage(
+          currentUser!.id,
+          otherUser!.id,
+          message,
+        );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to send image: ${e.toString()}')),
+        SnackBar(content: Text("Failed to send image: ${e.toString()}")),
       );
     } finally {
       if (mounted) {
@@ -254,4 +215,47 @@ class _ChatPageState extends State<ChatPage> {
       }
     }
   }
+
+
+  List<ChatMessage> _generateChatMessagesList(List<Message> messages){
+    List<ChatMessage> chatMessages = messages.map((m) {
+      if (m.messageType == MessageType.Image){
+        return ChatMessage(
+          user: m.senderID == currentUser!.id? currentUser! : otherUser!,
+          createdAt: m.sentAt!.toDate(),
+          medias: [
+              ChatMedia(url: m.content!, fileName: "", type: MediaType.image,)
+            ]
+            );
+
+      }else{
+
+      return ChatMessage(
+        user: m.senderID == currentUser!.id? currentUser! : otherUser!, 
+        text: m.content!,
+        createdAt: m.sentAt!.toDate(),
+      );
+      }
+
+
+    }).toList();
+    chatMessages.sort((a,b){return b.createdAt.compareTo(a.createdAt);
+    });
+    return chatMessages;
+  }
+
+  Widget _mediaMessageButton (){
+    return IconButton(onPressed: () async{
+     File? file = await _mediaService.getImageFromGallery();
+     if (file != null){
+      await _sendImageMessage(file);/////////
+      
+     }
+    }, icon: Icon(
+    Icons.image,
+    color: Colors.pinkAccent,
+    ),
+    );
+  }
 }
+

@@ -1,5 +1,6 @@
 // ignore_for_file: unused_import
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -9,12 +10,15 @@ import 'package:test/pages/forgot_pass.dart';
 import 'package:test/pages/otp.dart';
 import 'package:test/pages/homePage.dart';
 import 'package:test/pages/profile.dart';
+import 'package:test/pages/upload_page.dart';
 import 'package:test/theme/dark_mode.dart';
 import 'package:test/theme/light_mode.dart';
 import 'package:test/utils.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await EasyLocalization.ensureInitialized();
+ WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: FirebaseOptions(
       apiKey: "AIzaSyCxMg3oUQ2hlFWV8NYq8PwTnUSl7epEhJY",
@@ -27,7 +31,15 @@ void main() async {
   await registerServices();
 
   ///----------------------------------
-  runApp(MyApp());
+    runApp(
+    EasyLocalization(
+      supportedLocales: [Locale('en'), Locale('ar')],
+      path: 'assets/translations', 
+      fallbackLocale: Locale('en'),
+      saveLocale: true,
+      child: MyApp()
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -37,6 +49,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      localizationsDelegates: context.localizationDelegates,
+      supportedLocales: context.supportedLocales,
+      locale: context.locale,
       home: SplashScreen(),
       theme: lightMode,
       darkTheme: darkMode,

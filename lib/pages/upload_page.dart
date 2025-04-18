@@ -11,6 +11,7 @@ class UploadPage extends StatefulWidget {
 
   @override
   _UploadPageState createState() => _UploadPageState();
+  
 }
 
 class _UploadPageState extends State<UploadPage> {
@@ -84,11 +85,7 @@ class _UploadPageState extends State<UploadPage> {
           _statusMessage =
               'Upload successful! Image and prediction saved to Cloudinary.';
         });
-      } else {
-        setState(() {
-          _statusMessage = 'Upload failed. Please try again.';
-        });
-      }
+      } 
     } else {
       setState(() {
         _statusMessage = 'Error during detection. Please try again.';

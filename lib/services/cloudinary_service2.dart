@@ -28,8 +28,9 @@ class CloudinaryService2 {
     int timestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
 
     // Generate the string to sign for signature
-    String toSign =
-        "auto_tagging=0.8&categorization=imagga_tagging&timestamp=$timestamp&upload_preset=$uploadPreset$apiSecret";
+String toSign =
+    "auto_tagging=0.8&categorization=imagga_tagging&tags=$detectedData&timestamp=$timestamp&upload_preset=$uploadPreset$apiSecret";
+
 
     // Generate SHA-1 signature using the API secret and string to sign
     var bytes = utf8.encode(toSign);

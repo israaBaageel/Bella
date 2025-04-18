@@ -6,6 +6,10 @@ from PIL import Image
 from cloudinary.uploader import upload  # This is for Cloudinary upload
 import cloudinary
 
+from dotenv import load_dotenv
+load_dotenv()
+
+
 app = Flask(__name__)
 
 # Load the model and processor
@@ -14,20 +18,21 @@ model = CLIPModel.from_pretrained(model_name)
 processor = CLIPProcessor.from_pretrained(model_name)
 
 # Define fashion categories and attributes
-fashion_categories = ["t-shirt", "dress", "jeans", "jacket", "shorts",
-                     "skirt", "blouse", "sneakers", "heels", "bag",
-                     "handbag", "backpack", "purse", "dress-shoes"]
+fashion_categories = ["t-shirt","shirt","blouse","sweater","vest","jacket",
+                      "jumpsuit","dress", "jeans", "shorts","pants", "skirt", 
+                     "sneakers", "heels","boots", "dress-shoes","sandals",
+                       "bag","handbag", "backpack", "purse"]
 
 fashion_attributes = {
     "category": ["top", "shoes", "bottom", "dress","others"],
-    "color": ["Red", "Blue", "Yellow", "Green", "Orange", "Purple", "Violet", "Red-Orange", "Yellow-Orange", "Yellow-Green", "Blue-Green", 
-              "Teal", "Blue-Purple", "Indigo", "Red-Purple", "Magenta", "White", "Black", "Gray", "Light Gray", "Dark Gray", "Silver",
-              "Beige", "Ivory", "Taupe", "Charcoal", "Gold", "Amber", "Coral", "Peach", "Rust", "Maroon", "Scarlet", "Turquoise", "Mint",
-              "Lavender", "Slate", "Navy", "Ice Blue", "Baby Pink", "Sky Blue", "Lilac", "Powder Blue", "Pale Yellow", "Rose Quartz", "Brown",
-              "Tan", "Olive Green", "Terracotta", "Khaki", "Sand", "Sienna", "Umber", "Ochre", "Moss Green", "Bronze", "Copper", "Platinum",
-              "Rose Gold", "Gunmetal", "Neon Green", "Electric Blue", "Hot Pink", "Bright Purple", "Lemon Yellow", "Fluorescent Orange",
-              "Midnight Blue", "Ebony", "Burgundy", "Forest Green", "Deep Purple", "Dark Slate", "Cyan", "Fuchsia", "Chartreuse", "Vermillion",
-              "Mauve", "Cerulean", "Salmon", "floral"],
+    "color": ["Red", "Blue", "Yellow", "Green", "Orange", "Purple", "Violet",  
+              "Magenta", "White", "Black", "Gray", "Light Gray", "Dark Gray", "Silver",
+              "Beige", "Gold", "Amber", "Coral", "Peach", "Rust", "Maroon", "Scarlet", "Turquoise", "Mint",
+              "Lavender", "Navy", "Ice Blue", "Baby Pink", "Sky Blue", "Lilac", "Powder Blue", "Pale Yellow",
+                "Rose Quartz", "Brown", "Olive Green",  "Khaki", "Bronze", "Copper", "Platinum",
+              "Rose Gold", "Neon Green", "Electric Blue", "Hot Pink", "Bright Purple",
+             "Burgundy", "Deep Purple", "Cyan", "Fuchsia", "floral"],
+
     "style": ["casual", "formal", "sporty", "bohemian"],
     "season": ["summer", "winter", "spring", "fall"],
     "sleeve_length": ["long sleeve", "short sleeve", "sleeveless", "no sleeves"],
@@ -42,18 +47,49 @@ cloudinary.config(
 )
 
 # Helper function to analyze clothing
+# Analyze clothing
 def analyze_clothing(image_path):
     image = Image.open(image_path)
 
-    # Classify clothing type
+    # Predict clothing type
     inputs = processor(text=fashion_categories, images=image, return_tensors="pt", padding=True)
     outputs = model(**inputs)
     probs = outputs.logits_per_image.softmax(dim=1)
     clothing_type = fashion_categories[probs.argmax().item()]
 
-    # Detect attributes
-    attributes = {}
+    # Map type to category
+    type_to_category = {
+        "t-shirt": "top",
+        "shirt": "top",
+        "sweater": "top",
+        "blouse": "top",
+        "jacket": "top",
+        "vest": "top",
+        "dress": "dress",
+        "jeans": "bottom",
+        "pants": "bottom",
+        "shorts": "bottom",
+        "skirt": "bottom",
+        "sneakers": "shoes",
+        "heels": "shoes",
+        "dress-shoes": "shoes",
+        "boots": "shoes",
+        "sandals": "shoes",
+        "bag": "others",
+        "handbag": "others",
+        "backpack": "others",
+        "purse": "others",
+    }
+
+    attributes = {
+        "type": clothing_type,
+        "category": type_to_category.get(clothing_type, "others")
+    }
+
+    # Predict other attributes
     for attr, options in fashion_attributes.items():
+        if attr == "category":  # Already handled
+            continue
         if attr == "sleeve_length" and clothing_type in ["bag", "handbag", "backpack", "purse", "sneakers", "heels"]:
             continue
         if attr == "bag_type" and clothing_type not in ["bag", "handbag", "backpack", "purse"]:
@@ -64,7 +100,7 @@ def analyze_clothing(image_path):
         probs = outputs.logits_per_image.softmax(dim=1)
         attributes[attr] = options[probs.argmax().item()]
 
-    return {"type": clothing_type, **attributes}
+    return attributes
 
 # Function to generate outfit based on the analysis
 def generate_outfit(analysis):

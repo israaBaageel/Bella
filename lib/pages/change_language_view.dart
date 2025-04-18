@@ -1,4 +1,5 @@
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:restart_app/restart_app.dart';
@@ -12,7 +13,7 @@ class ChangeLanguageView extends StatelessWidget {
       appBar: AppBar(
           backgroundColor: Colors.green[100],
           title: Text(
-            'change Language',
+            'change Language'.tr(),  
             style: GoogleFonts.aboreto(
               textStyle: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
           ),
@@ -33,8 +34,8 @@ class ChangeLanguageView extends StatelessWidget {
               ),
             ),
             onTap: () {
-              //context.setLocale(Locale("ar"));
-              Restart.restartApp();
+              context.setLocale(Locale("ar"));
+              //Restart.restartApp();
             },
           ),
           ListTile(
@@ -49,8 +50,8 @@ class ChangeLanguageView extends StatelessWidget {
               ),
             ),
             onTap: () {
-              //context.setLocale(Locale("en"));
-              Restart.restartApp();
+              context.setLocale(Locale("en"));
+              //Restart.restartApp();
             },
           ),
         ],

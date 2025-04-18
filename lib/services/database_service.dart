@@ -42,7 +42,7 @@ class AppDatabaseService {
 
   //=====================[ Files ]=====================
   Future<void> saveUploadFilesData(Map<String, String> data) async {
-    return _firebaseFirestore
+    return FirebaseFirestore.instance
         .collection("user-files")
         .doc(user!.uid)
         .collection("uploads")
@@ -51,7 +51,7 @@ class AppDatabaseService {
   }
 
   Stream<QuerySnapshot> readUploadedFiles() {
-    return _firebaseFirestore
+    return FirebaseFirestore.instance
         .collection("user-files")
         .doc(user!.uid)
         .collection("uploads")

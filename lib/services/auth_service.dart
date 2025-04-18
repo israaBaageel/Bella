@@ -20,8 +20,16 @@ class AuthService {
         _user = credential.user;
         return true;
       }
-    } catch (e) {
-      print(e);
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        throw FirebaseAuthException(
+            code: 'user-not-found', message: 'No user found with this email.');
+      } else if (e.code == 'wrong-password') {
+        throw FirebaseAuthException(
+            code: 'wrong-password', message: 'Incorrect password.');
+      } else {
+        throw FirebaseAuthException(code: e.code, message: e.message);
+      }
     }
     return false;
   }
@@ -36,8 +44,14 @@ class AuthService {
         _user = credential.user;
         return true;
       }
-    } catch (e) {
-      print(e);
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'email-already-in-use') {
+        throw FirebaseAuthException(
+            code: 'email-already-in-use',
+            message: 'This email is already registered.');
+      } else {
+        throw FirebaseAuthException(code: e.code, message: e.message);
+      }
     }
     return false;
   }

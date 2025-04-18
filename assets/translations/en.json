@@ -1,7 +1,27 @@
 {
 "Menu" :"Menu",
-"Home": " home",
-"change Language" : "change Language"
+"Home": "Home",
+"change Language" : "change Language",
+"Settings" : "Settings",
+"Help" : "Help",
+"Language" : "Language",
+"Logout" : "Logout",
+
+"Categories" : "Categories",
+"All" : "All",
+"Top" : "Top",
+"Bottom" : "Bottom",
+"Shoes" : "Shoes",
+"Dress" : "Dress",
+"Others": "Others",
+
+"Give Your Clothes A New Life" : "Give Your Clothes A New Life",
+"Share your kindness":"Share your kindness",
+"Hello, Gorgeousss!" : "Hello, Gorgeousss!",
+
+
+"MY CLOSET": "MY CLOSET"
+
 
 
 }

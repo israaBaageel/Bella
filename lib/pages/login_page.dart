@@ -18,24 +18,28 @@ class LoginPage extends StatefulWidget {
   State<LoginPage> createState() => _LoginPageState();
 }
 
-  class _LoginPageState extends State<LoginPage> {
-  //text controllers
+class _LoginPageState extends State<LoginPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-  final FirebaseAuth instance = FirebaseAuth.instance; // server auth db
+  final FirebaseAuth instance = FirebaseAuth.instance;
   var loginKey = GlobalKey<ScaffoldState>();
   final GetIt _getIt = GetIt.instance;
 
   late AuthService _authService;
 
-    @override
+  @override
   void initState() {
     super.initState();
-
     _authService = _getIt.get<AuthService>();
- 
   }
+
+  void showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -49,34 +53,24 @@ class LoginPage extends StatefulWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const SizedBox(
-                    height: 20,
-                  ),
-
-                  // greeting
+                  const SizedBox(height: 20),
                   Text(
                     'Welcome back you’ve been missed!',
                     style: GoogleFonts.aboreto(
-                      textStyle: const TextStyle(
-                        fontSize: 18,
-                      ),
+                      textStyle: const TextStyle(fontSize: 18),
                     ),
                   ),
                   const SizedBox(height: 50),
-                  //
                   Row(
                     children: [
                       Text(
                         'Sign in',
                         style: GoogleFonts.aboreto(
-                          textStyle: const TextStyle(
-                            fontSize: 25,
-                          ),
+                          textStyle: const TextStyle(fontSize: 25),
                         ),
                       ),
                     ],
                   ),
-                  //
                   Padding(
                     padding: const EdgeInsets.only(left: 25.0),
                     child: Row(
@@ -88,7 +82,6 @@ class LoginPage extends StatefulWidget {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        //////////////////////////////////////////////////////
                         GestureDetector(
                           onTap: widget.onTap,
                           child: const Text(
@@ -103,26 +96,18 @@ class LoginPage extends StatefulWidget {
                       ],
                     ),
                   ),
-
                   const SizedBox(height: 50),
-
-                  // email field
                   MyTextField(
                     hintText: 'Enter your Email',
                     obscureText: false,
                     controller: emailController,
                   ),
-
                   const SizedBox(height: 10),
-
-                  // password field
                   MyTextField(
                     hintText: "Enter your Password",
                     obscureText: true,
                     controller: passwordController,
                   ),
-
-                  //forgot pass ?
                   GestureDetector(
                     onTap: () {
                       Navigator.push(
@@ -142,25 +127,28 @@ class LoginPage extends StatefulWidget {
                       ),
                     ),
                   ),
-
                   const SizedBox(height: 50),
-
-                  //sign in button
-
                   MyButton(
                     text: "Sign in",
                     onTap: () async {
                       try {
-                        await _authService.login( emailController.text, passwordController.text);
+                        bool success = await _authService.login(
+                          emailController.text.trim(),
+                          passwordController.text.trim(),
+                        );
 
-                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>const HomePage(),),);
-                      } on FirebaseAuthException catch (e) {
-                        print(e);
-                        if (e.code == 'invalid-credential') {
-                          ScaffoldMessenger.of(context).showSnackBar(////////////////////////////////
-                            const SnackBar(content: Text('Invalid email or password')),
+                        if (success) {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const HomePage(),
+                            ),
                           );
                         }
+                      } on FirebaseAuthException catch (e) {
+                        showError('Email or password is incorrect');
+                      } catch (e) {
+                        showError('An unknown error occurred');
                       }
                     },
                   )
