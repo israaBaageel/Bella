@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:test/services/database_service.dart';
 
 class CloudinaryService2 {
-  // Upload image with metadata (including prediction result)
+  // Upload image with metadata (without auto-tagging)
   Future<bool> uploadImageWithMetadata(File file, String detectedData) async {
     print("Starting upload with metadata...");
 
@@ -27,10 +27,9 @@ class CloudinaryService2 {
     // Generate timestamp
     int timestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
 
-    // Generate the string to sign for signature
-String toSign =
-    "auto_tagging=0.8&categorization=imagga_tagging&tags=$detectedData&timestamp=$timestamp&upload_preset=$uploadPreset$apiSecret";
-
+    // Generate the string to sign for signature (without auto_tagging and categorization)
+    String toSign =
+        "tags=$detectedData&timestamp=$timestamp&upload_preset=$uploadPreset$apiSecret";
 
     // Generate SHA-1 signature using the API secret and string to sign
     var bytes = utf8.encode(toSign);
@@ -57,8 +56,6 @@ String toSign =
     request.fields['signature'] = signature;
     request.fields['upload_preset'] = uploadPreset;
     request.fields['resource_type'] = "image"; // Auto-detect file type
-    request.fields['categorization'] = "imagga_tagging"; // Enable auto-tagging
-    request.fields['auto_tagging'] = "0.8"; // Confidence threshold
     request.fields['tags'] =
         detectedData; // Add prediction result as metadata (tags)
 
@@ -138,7 +135,7 @@ Future<bool> deleteFromCloudinary(String publicId) async {
     }
   } else {
     print(
-      "Failed to delete the file, status: \${response.statusCode} : \${response.reasonPhrase}",
+      "Failed to delete the file, status: ${response.statusCode} : ${response.reasonPhrase}",
     );
     return false;
   }

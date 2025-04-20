@@ -35,9 +35,9 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -145,13 +145,13 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                           );
                         }
-                      } on FirebaseAuthException catch (e) {
+                      } on FirebaseAuthException {
                         showError('Email or password is incorrect');
                       } catch (e) {
                         showError('An unknown error occurred');
                       }
                     },
-                  )
+                  ),
                 ],
               ),
             ),
