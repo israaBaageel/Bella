@@ -7,17 +7,10 @@ class DonationScreen extends StatelessWidget {
   const DonationScreen({super.key, required this.selectedItems});
 
   Future<void> _launchAwonPlatform(BuildContext context) async {
-    print('Attempting to launch Awon platform...');
-    const url = 'https://awonksa.com/pr_university/';
-    if (await canLaunch(url)) {
-      print('Launching URL: $url');
-      await launch(url);
-    } else {
-      print('Failed to launch URL: $url');
+    final url = Uri.parse('https://awonksa.com/pr_university/');
+    if (!await launchUrl(url, mode: LaunchMode.inAppWebView)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Could not open Awon platform. Please try again.'),
-        ),
+        const SnackBar(content: Text('Could not open Awon platform.')),
       );
     }
   }

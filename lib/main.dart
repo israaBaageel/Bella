@@ -18,7 +18,7 @@ import 'package:test/utils.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
- WidgetsFlutterBinding.ensureInitialized();
+  WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: FirebaseOptions(
       apiKey: "AIzaSyCxMg3oUQ2hlFWV8NYq8PwTnUSl7epEhJY",
@@ -31,13 +31,13 @@ void main() async {
   await registerServices();
 
   ///----------------------------------
-    runApp(
+  runApp(
     EasyLocalization(
       supportedLocales: [Locale('en'), Locale('ar')],
-      path: 'assets/translations', 
+      path: 'assets/translations',
       fallbackLocale: Locale('en'),
       saveLocale: true,
-      child: MyApp()
+      child: MyApp(),
     ),
   );
 }
