@@ -5,6 +5,7 @@ import 'package:test/pages/firstPage.dart';
 import 'package:test/pages/profile.dart';
 import 'package:test/pages/donation_screen.dart';
 import 'package:test/pages/upload_page.dart';
+import 'package:test/pages/outfit_generator_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -25,7 +26,7 @@ class _MyWidgetState extends State<HomePage> {
   // pages to navigate to
   final List<Widget> _children = [
     Center(child: Firstpage()),
-    Center(child: Text('ssss')),
+    Center(child: OutfitGeneratorPage()),
     Center(child: Center(child: UploadPage())),
     Center(child: MessagePage()),
     Center(child: DonationScreen(selectedItems: [])),
