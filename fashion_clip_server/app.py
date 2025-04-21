@@ -152,16 +152,27 @@ def generate_outfit():
 
     outfit = {}
 
-    if dresses:
-        outfit['dress'] = random.choice(dresses)
+    # ✅ Randomly decide to generate top+bottom or dress
+    if (tops and bottoms) and dresses:
+        choice = random.choice(['top_bottom', 'dress'])
     elif tops and bottoms:
+        choice = 'top_bottom'
+    elif dresses:
+        choice = 'dress'
+    else:
+        return jsonify({'message': 'Not enough clothing items'}), 200
+
+    if choice == 'top_bottom':
         outfit['top'] = random.choice(tops)
         outfit['bottom'] = random.choice(bottoms)
+    elif choice == 'dress':
+        outfit['dress'] = random.choice(dresses)
 
     if shoes:
         outfit['shoes'] = random.choice(shoes)
 
     return jsonify({'outfit': outfit})
+
 
 # Run the app
 if __name__ == '__main__':
