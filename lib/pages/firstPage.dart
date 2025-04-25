@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:test/components/image_slider.dart';
 import 'package:test/pages/All_itemPage.dart';
 import 'package:test/pages/change_language_view.dart';
+import 'package:test/pages/gemchat.dart';
 import 'package:test/util/bubble_cat.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:test/util/catigories.dart';
@@ -25,6 +26,7 @@ class Firstpage extends StatelessWidget {
       length: 3,
       child: Scaffold(
         appBar: AppBar(
+          
           backgroundColor: Colors.green[100],
           title: Text(
             'Hello, Gorgeousss!'.tr(),
@@ -71,7 +73,7 @@ class Firstpage extends StatelessWidget {
                 title: Text('Help'.tr()),
                 onTap: () {
                   // Update the UI
-                  Navigator.pop(context);
+                 // Navigator.of(context).push(MaterialPageRoute(builder: (context)=>Gemchat()));
                 },
               ),
               ListTile(
@@ -105,6 +107,17 @@ class Firstpage extends StatelessWidget {
           padding: const EdgeInsets.all(10),
           children: [
             // Image Slider
+              Container(
+                color: Colors.yellow[200],
+                child: ListTile(
+                  leading: Icon(Icons.tips_and_updates),
+                  title: Text('CLICK to get Fashion Assistant'.tr()),
+                  onTap: () {
+                    // Update the UI
+                    Navigator.of(context).push(MaterialPageRoute(builder: (context)=>Gemichat()));
+                  },
+                ),
+              ),
             const ImageSlider(),
 
             const SizedBox(height: 30),
