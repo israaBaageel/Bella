@@ -43,3 +43,9 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+
+# Ignore secret keys
+fashion_clip_server/firebase-key.json
+lib/pages/api.dart
+
