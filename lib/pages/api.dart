@@ -1,3 +1,0 @@
-class APIKey {
-  static const apiKey = "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";
-}
