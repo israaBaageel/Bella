@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "995085343627",
+    "project_id": "outfit-6a1de",
+    "storage_bucket": "outfit-6a1de.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:995085343627:android:9f90e3fff63b1e1aefad8e",
+        "android_client_info": {
+          "package_name": "com.example.login_f"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCxMg3oUQ2hlFWV8NYq8PwTnUSl7epEhJY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
